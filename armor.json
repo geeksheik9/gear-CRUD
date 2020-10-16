@@ -1,0 +1,9 @@
+{
+    "type": "Adverse Environment Gear",
+    "defense": 0,
+    "soak": 1,
+    "price": 500,
+    "encumbrance":2,
+    "hardPoints": 1,
+    "rarity": 1
+}
