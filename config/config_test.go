@@ -45,7 +45,7 @@ func TestConfig_NewWithError(t *testing.T) {
 		}
 	}
 
-	expectedErr := "error loading environment variable CHARACTER_DATABASE: test error"
+	expectedErr := "error loading environment variable PORT: test error"
 	_, err := New(configAccessor)
 	if err.Error() != expectedErr {
 		t.Errorf("New() returned wrong value: got %v, want %v", err, expectedErr)
