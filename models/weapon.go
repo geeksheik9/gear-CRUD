@@ -3,7 +3,7 @@ package model
 import "go.mongodb.org/mongo-driver/bson/primitive"
 
 // Weapon struct is used to create a Weapon object
-type weapon struct {
+type Weapon struct {
 	ID           primitive.ObjectID `json:"_id" bson:"_id"`
 	WeaponType   string             `json:"type" bson:"type"`
 	Name         string             `json:"name" bson:"name"`
