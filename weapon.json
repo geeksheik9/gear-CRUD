@@ -1,0 +1,13 @@
+{
+    "type": "Brawl",
+    "name": "Brass Knuckles",
+    "skill": "Brawl",
+    "damage": "+1",
+    "critical": 4,
+    "range": "Engaged",
+    "encumberence": 1,
+    "hp": 0,
+    "price": 25,
+    "rarity": 0,
+    "special": "Disorient 3"
+}

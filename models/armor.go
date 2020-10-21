@@ -10,6 +10,6 @@ type Armor struct {
 	Soak        int64              `json:"soak" bson:"soak"`
 	Price       int64              `json:"price" bson:"price"`
 	Encumbrance int64              `json:"encumbrance" bson:"encumbrance"`
-	HardPoitns  int64              `json:"hardPoints" bson:"hardPoints"`
+	HardPoints  int64              `json:"hardPoints" bson:"hardPoints"`
 	Rarity      int64              `json:"rarity" bson:"rarity"`
 }
