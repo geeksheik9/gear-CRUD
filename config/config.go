@@ -7,17 +7,20 @@ import (
 )
 
 var envMap = map[string]string{
-	port:     defaultPort,
-	logLevel: defaultlogLevel,
+	port:             defaultPort,
+	logLevel:         defaultlogLevel,
+	gearDatabase:     defaultGearDatabase,
+	armorCollection:  defaultArmorCollection,
+	weaponCollection: defaultWeaponCollection,
 }
 
 //Config is the general struct for app configuration
 type Config struct {
-	Port                string       `json:"port"`
-	CharacterDatabase   string       `json:"characterDatabase"`
-	CharacterCollection string       `json:"characterCollection"`
-	CharacterArchive    string       `json:"characterArchive"`
-	LogLevel            logrus.Level `json:"log-level"`
+	Port             string       `json:"port"`
+	GearDatabase     string       `json:"characterDatabase"`
+	ArmorCollection  string       `json:"characterCollection"`
+	WeaponCollection string       `json:"characterArchive"`
+	LogLevel         logrus.Level `json:"log-level"`
 }
 
 //Accessor is the interface setup for any configuration accessor
@@ -40,8 +43,11 @@ func New(accessor Accessor) (c *Config, err error) {
 	}
 
 	config := Config{
-		Port:     envMap[port],
-		LogLevel: currentLogLevel,
+		Port:             envMap[port],
+		GearDatabase:     envMap[gearDatabase],
+		ArmorCollection:  envMap[armorCollection],
+		WeaponCollection: envMap[weaponCollection],
+		LogLevel:         currentLogLevel,
 	}
 	return &config, nil
 }
