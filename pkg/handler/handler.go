@@ -29,9 +29,17 @@ func (s *GearService) Routes(r *mux.Router) *mux.Router {
 	r.HandleFunc("/ping", s.PingCheck).Methods(http.MethodGet)
 	r.Handle("/health", s.healthCheck(s.Database)).Methods(http.MethodGet)
 
+	//Inserts
 	r.HandleFunc("/armor", s.InsertArmor).Methods(http.MethodPost)
-
 	r.HandleFunc("/weapon", s.InsertWeapon).Methods(http.MethodPost)
+
+	//TODO: GETALL
+
+	//TODO: GETBYID
+
+	//TODO: UPDATEBYID
+
+	//TODO: DELETEBYID
 	return r
 }
 
