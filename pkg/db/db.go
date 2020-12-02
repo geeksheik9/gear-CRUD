@@ -94,14 +94,14 @@ func (g *GearDB) GetArmorByID(mongoID primitive.ObjectID) (*model.Armor, error) 
 	collection := g.client.Database(g.databaseName).Collection(g.armorCollection)
 	query := api.BuildQuery(&mongoID, nil)
 
-	sheet := model.Armor{}
+	armor := model.Armor{}
 
-	err := collection.FindOne(context.Background(), query).Decode(&sheet)
+	err := collection.FindOne(context.Background(), query).Decode(&armor)
 	if err != nil {
 		return nil, err
 	}
 
-	return &sheet, err
+	return &armor, err
 }
 
 //UpdateArmorByID updates a specific armor in the armor database
@@ -151,4 +151,46 @@ func (g *GearDB) InsertWeapon(weapon *model.Weapon) error {
 	_, err := collection.InsertOne(context.Background(), weapon)
 
 	return err
+}
+
+//GetWeapon is the database implementation to get all armor objects
+func (g *GearDB) GetWeapon(queryParams url.Values) ([]model.Weapon, error) {
+	logrus.Debug("BEGIN - GetWeapon")
+
+	collection := g.client.Database(g.databaseName).Collection(g.weaponCollection)
+
+	pageNumber, pageCount, sort, filter := api.BuildFilter(queryParams)
+
+	skip := 0
+	if pageNumber > 0 {
+		skip = (pageNumber - 1) * pageCount
+	}
+
+	opts := options.Find().
+		SetMaxTime(30 * time.Second).
+		SetSkip(int64(skip)).
+		SetLimit(int64(pageCount)).
+		SetSort(bson.D{{
+			Key:   sort,
+			Value: 1,
+		}})
+
+	cur, err := collection.Find(context.Background(), filter, opts)
+	if err != nil {
+		return nil, err
+	}
+
+	matches := []model.Weapon{}
+
+	for cur.Next(context.Background()) {
+		elem := model.Weapon{}
+		err := cur.Decode(&elem)
+		if err != nil {
+			return nil, err
+		}
+
+		matches = append(matches, elem)
+	}
+
+	return matches, nil
 }

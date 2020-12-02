@@ -22,6 +22,10 @@ type GearDatabase interface {
 	DeleteArmorByID(mongoID primitive.ObjectID) error
 	//Weapon methods
 	InsertWeapon(weapon *model.Weapon) error
+	GetWeapon(query url.Values) ([]model.Weapon, error)
+	GetWeaponByID(mongoID primitive.ObjectID) (*model.Weapon, error)
+	UpdateWeaponByID(weapon model.Weapon, mongoID primitive.ObjectID) error
+	DeleteWeaponByID(mongoID primitive.ObjectID) error
 	//Helper methods
 	Ping() error
 }
@@ -43,15 +47,19 @@ func (s *GearService) Routes(r *mux.Router) *mux.Router {
 
 	//TODO: GETALL
 	r.HandleFunc("/armor", s.GetArmor).Methods(http.MethodGet)
+	r.HandleFunc("/weapon", s.GetWeapon).Methods(http.MethodGet)
 
 	//TODO: GETBYID
 	r.HandleFunc("/armor/{ID}", s.GetArmorByID).Methods(http.MethodGet)
+	//r.HandleFunc("/weapon/{ID}", s.GetWeaponByID).Methods(http.MethodGet)
 
 	//TODO: UPDATEBYID
 	r.HandleFunc("/armor/{ID}", s.UpdateArmorByID).Methods(http.MethodPut)
+	//r.HandleFunc("/weapon/{ID}", s.UpdateWeaponByID).Methods(http.MethodPut)
 
 	//TODO: DELETEBYID
 	r.HandleFunc("/armor/{ID}", s.DeleteArmorByID).Methods(http.MethodDelete)
+	//r.HandleFunc("/weapon/{ID}", s.DeleteWeaponByID).Methods(http.MethodDelete)
 
 	return r
 }
@@ -143,6 +151,19 @@ func (s *GearService) GetArmor(w http.ResponseWriter, r *http.Request) {
 	api.RespondWithJSON(w, http.StatusOK, armor)
 }
 
+//GetWeapon is the hanblder function to return all weapons in the database
+func (s *GearService) GetWeapon(w http.ResponseWriter, r *http.Request) {
+	logrus.Infof("GetWeapon invoked with url: %v", r.URL)
+
+	weapon, err := s.Database.GetWeapon(r.URL.Query())
+	if err != nil {
+		api.RespondWithError(w, api.CheckError(err), err.Error())
+		return
+	}
+
+	api.RespondWithJSON(w, http.StatusOK, weapon)
+}
+
 //GetArmorByID is the handler function to return a specific armor in the database
 func (s *GearService) GetArmorByID(w http.ResponseWriter, r *http.Request) {
 	logrus.Infof("GetArmorByID invoked with url: %v", r.URL)
@@ -156,13 +177,13 @@ func (s *GearService) GetArmorByID(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	sheet, err := s.Database.GetArmorByID(objectID)
+	armor, err := s.Database.GetArmorByID(objectID)
 	if err != nil {
 		api.RespondWithError(w, api.CheckError(err), err.Error())
 		return
 	}
 
-	api.RespondWithJSON(w, http.StatusOK, sheet)
+	api.RespondWithJSON(w, http.StatusOK, armor)
 }
 
 //UpdateArmorByID is the handler function to update a specific armor in the database
