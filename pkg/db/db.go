@@ -161,8 +161,6 @@ func (g *GearDB) GetWeapon(queryParams url.Values) ([]model.Weapon, error) {
 
 	pageNumber, pageCount, sort, filter := api.BuildFilter(queryParams)
 
-	// localhost:3000/weapon
-
 	skip := 0
 	if pageNumber > 0 {
 		skip = (pageNumber - 1) * pageCount
@@ -184,12 +182,7 @@ func (g *GearDB) GetWeapon(queryParams url.Values) ([]model.Weapon, error) {
 
 	matches := []model.Weapon{}
 
-	/*[
-
-	]*/
-
 	for cur.Next(context.Background()) {
-		//while cur has another object do below
 		elem := model.Weapon{}
 		err := cur.Decode(&elem)
 		if err != nil {
@@ -197,9 +190,7 @@ func (g *GearDB) GetWeapon(queryParams url.Values) ([]model.Weapon, error) {
 		}
 
 		matches = append(matches, elem)
-		//[{name:sword}]
 	}
-	//[{name:sword},{name:knife}...]
 
 	return matches, nil
 }
