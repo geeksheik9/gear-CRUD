@@ -45,21 +45,17 @@ func (s *GearService) Routes(r *mux.Router) *mux.Router {
 	r.HandleFunc("/armor", s.InsertArmor).Methods(http.MethodPost)
 	r.HandleFunc("/weapon", s.InsertWeapon).Methods(http.MethodPost)
 
-	//TODO: GETALL
 	r.HandleFunc("/armor", s.GetArmor).Methods(http.MethodGet)
 	r.HandleFunc("/weapon", s.GetWeapon).Methods(http.MethodGet)
 
-	//TODO: GETBYID
 	r.HandleFunc("/armor/{ID}", s.GetArmorByID).Methods(http.MethodGet)
-	//r.HandleFunc("/weapon/{ID}", s.GetWeaponByID).Methods(http.MethodGet)
+	r.HandleFunc("/weapon/{ID}", s.GetWeaponByID).Methods(http.MethodGet)
 
-	//TODO: UPDATEBYID
 	r.HandleFunc("/armor/{ID}", s.UpdateArmorByID).Methods(http.MethodPut)
-	//r.HandleFunc("/weapon/{ID}", s.UpdateWeaponByID).Methods(http.MethodPut)
+	r.HandleFunc("/weapon/{ID}", s.UpdateWeaponByID).Methods(http.MethodPut)
 
-	//TODO: DELETEBYID
 	r.HandleFunc("/armor/{ID}", s.DeleteArmorByID).Methods(http.MethodDelete)
-	//r.HandleFunc("/weapon/{ID}", s.DeleteWeaponByID).Methods(http.MethodDelete)
+	r.HandleFunc("/weapon/{ID}", s.DeleteWeaponByID).Methods(http.MethodDelete)
 
 	return r
 }
@@ -186,6 +182,28 @@ func (s *GearService) GetArmorByID(w http.ResponseWriter, r *http.Request) {
 	api.RespondWithJSON(w, http.StatusOK, armor)
 }
 
+//GetWeaponByID is the handler function to return a specific weapon in the database
+func (s *GearService) GetWeaponByID(w http.ResponseWriter, r *http.Request) {
+	logrus.Infof("GetWeaponByID invoked with url: %v", r.URL)
+
+	vars := mux.Vars(r)
+	ID := vars["ID"]
+
+	objectID, err := api.StringToObjectID(ID)
+	if err != nil {
+		api.RespondWithError(w, api.CheckError(err), err.Error())
+		return
+	}
+
+	weapon, err := s.Database.GetWeaponByID(objectID)
+	if err != nil {
+		api.RespondWithError(w, api.CheckError(err), err.Error())
+		return
+	}
+
+	api.RespondWithJSON(w, http.StatusOK, weapon)
+}
+
 //UpdateArmorByID is the handler function to update a specific armor in the database
 func (s *GearService) UpdateArmorByID(w http.ResponseWriter, r *http.Request) {
 	logrus.Infof("UpdateArmorByID invoked with url: %v", r.URL)
@@ -216,6 +234,36 @@ func (s *GearService) UpdateArmorByID(w http.ResponseWriter, r *http.Request) {
 	api.RespondWithJSON(w, http.StatusOK, objectID)
 }
 
+//UpdateWeaponByID is the handler function to update a specific weapon in the database
+func (s *GearService) UpdateWeaponByID(w http.ResponseWriter, r *http.Request) {
+	logrus.Infof("UpdateWeaponByID invoked with url: %v", r.URL)
+	defer r.Body.Close()
+
+	vars := mux.Vars(r)
+	ID := vars["ID"]
+
+	objectID, err := primitive.ObjectIDFromHex(ID)
+	if err != nil {
+		api.RespondWithError(w, api.CheckError(err), err.Error())
+		return
+	}
+
+	weapon := model.Weapon{}
+	err = json.NewDecoder(r.Body).Decode(&weapon)
+	if err != nil {
+		api.RespondWithError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	err = s.Database.UpdateWeaponByID(weapon, objectID)
+	if err != nil {
+		api.RespondWithError(w, api.CheckError(err), err.Error())
+		return
+	}
+
+	api.RespondWithJSON(w, http.StatusOK, objectID)
+}
+
 //DeleteArmorByID is the handler function to remove a specific armor in the database
 func (s *GearService) DeleteArmorByID(w http.ResponseWriter, r *http.Request) {
 	logrus.Infof("DeleterArmorByID invoked with url: %v", r.URL)
@@ -230,6 +278,27 @@ func (s *GearService) DeleteArmorByID(w http.ResponseWriter, r *http.Request) {
 	}
 
 	err = s.Database.DeleteArmorByID(objectID)
+	if err != nil {
+		api.RespondWithError(w, api.CheckError(err), err.Error())
+	}
+
+	api.RespondNoContent(w, http.StatusNoContent)
+}
+
+//DeleteWeaponByID is the handler function to remove a specific weapon in the database
+func (s *GearService) DeleteWeaponByID(w http.ResponseWriter, r *http.Request) {
+	logrus.Infof("DeleterWeaponByID invoked with url: %v", r.URL)
+
+	vars := mux.Vars(r)
+	ID := vars["ID"]
+
+	objectID, err := primitive.ObjectIDFromHex(ID)
+	if err != nil {
+		api.RespondWithError(w, api.CheckError(err), err.Error())
+		return
+	}
+
+	err = s.Database.DeleteWeaponByID(objectID)
 	if err != nil {
 		api.RespondWithError(w, api.CheckError(err), err.Error())
 	}
