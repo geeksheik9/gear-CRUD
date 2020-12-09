@@ -45,19 +45,15 @@ func (s *GearService) Routes(r *mux.Router) *mux.Router {
 	r.HandleFunc("/armor", s.InsertArmor).Methods(http.MethodPost)
 	r.HandleFunc("/weapon", s.InsertWeapon).Methods(http.MethodPost)
 
-	//TODO: GETALL
 	r.HandleFunc("/armor", s.GetArmor).Methods(http.MethodGet)
 	r.HandleFunc("/weapon", s.GetWeapon).Methods(http.MethodGet)
 
-	//TODO: GETBYID
 	r.HandleFunc("/armor/{ID}", s.GetArmorByID).Methods(http.MethodGet)
 	r.HandleFunc("/weapon/{ID}", s.GetWeaponByID).Methods(http.MethodGet)
 
-	//TODO: UPDATEBYID
 	r.HandleFunc("/armor/{ID}", s.UpdateArmorByID).Methods(http.MethodPut)
 	r.HandleFunc("/weapon/{ID}", s.UpdateWeaponByID).Methods(http.MethodPut)
 
-	//TODO: DELETEBYID
 	r.HandleFunc("/armor/{ID}", s.DeleteArmorByID).Methods(http.MethodDelete)
 	r.HandleFunc("/weapon/{ID}", s.DeleteWeaponByID).Methods(http.MethodDelete)
 
