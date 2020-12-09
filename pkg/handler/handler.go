@@ -51,15 +51,15 @@ func (s *GearService) Routes(r *mux.Router) *mux.Router {
 
 	//TODO: GETBYID
 	r.HandleFunc("/armor/{ID}", s.GetArmorByID).Methods(http.MethodGet)
-	//r.HandleFunc("/weapon/{ID}", s.GetWeaponByID).Methods(http.MethodGet)
+	r.HandleFunc("/weapon/{ID}", s.GetWeaponByID).Methods(http.MethodGet)
 
 	//TODO: UPDATEBYID
 	r.HandleFunc("/armor/{ID}", s.UpdateArmorByID).Methods(http.MethodPut)
-	//r.HandleFunc("/weapon/{ID}", s.UpdateWeaponByID).Methods(http.MethodPut)
+	r.HandleFunc("/weapon/{ID}", s.UpdateWeaponByID).Methods(http.MethodPut)
 
 	//TODO: DELETEBYID
 	r.HandleFunc("/armor/{ID}", s.DeleteArmorByID).Methods(http.MethodDelete)
-	//r.HandleFunc("/weapon/{ID}", s.DeleteWeaponByID).Methods(http.MethodDelete)
+	r.HandleFunc("/weapon/{ID}", s.DeleteWeaponByID).Methods(http.MethodDelete)
 
 	return r
 }
