@@ -194,3 +194,58 @@ func (g *GearDB) GetWeapon(queryParams url.Values) ([]model.Weapon, error) {
 
 	return matches, nil
 }
+
+//GetWeaponByID is the database implementation to get a specific weapon back from the database
+func (g *GearDB) GetWeaponByID(mongoID primitive.ObjectID) (*model.Weapon, error) {
+	logrus.Debugf("BEGIN - GetWeaponByID: %v", mongoID)
+
+	collection := g.client.Database(g.databaseName).Collection(g.weaponCollection)
+	query := api.BuildQuery(&mongoID, nil)
+
+	weapon := model.Weapon{}
+
+	err := collection.FindOne(context.Background(), query).Decode(&weapon)
+	if err != nil {
+		return nil, err
+	}
+
+	return &weapon, err
+}
+
+//UpdateWeaponByID updates a specific weapon in the weapon database
+func (g *GearDB) UpdateWeaponByID(weapon model.Weapon, mongoID primitive.ObjectID) error {
+
+	collection := g.client.Database(g.databaseName).Collection(g.weaponCollection)
+
+	result, err := collection.UpdateOne(context.Background(), bson.M{"_id": mongoID}, bson.D{{
+		Key:   "$set",
+		Value: weapon,
+	}})
+	if err != nil {
+		return err
+	}
+
+	matched := strconv.FormatInt(result.MatchedCount, 10)
+	modified := strconv.FormatInt(result.ModifiedCount, 10)
+
+	if result.MatchedCount != 1 {
+		return errors.New("Could not update sheet. Tried to update " + mongoID.Hex() + " got " + matched + " matches instead of 1")
+	}
+
+	if result.ModifiedCount != 1 {
+		return errors.New("Could not update sheet. Tried to updated " + mongoID.Hex() + " tried to update " + modified + " number of results instead of 1")
+	}
+
+	return nil
+}
+
+//DeleteWeaponByID deletes a specific weapon from the database
+func (g *GearDB) DeleteWeaponByID(mongoID primitive.ObjectID) error {
+	logrus.Debugf("BEGIN - DeleteForceCharacterSheetByID: %v", mongoID)
+
+	collection := g.client.Database(g.databaseName).Collection(g.weaponCollection)
+
+	_, err := collection.DeleteOne(context.Background(), bson.M{"_id": mongoID})
+
+	return err
+}
