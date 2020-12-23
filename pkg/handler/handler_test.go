@@ -222,3 +222,117 @@ func TestGearService_InsertWeapon_BadJSON(t *testing.T) {
 		t.Errorf("InsertWeapon() error:\ngot: %v\nexpected: %v", w.Code, http.StatusBadRequest)
 	}
 }
+
+func TestGearService_GetArmor_Success(t *testing.T) {
+	id := primitive.NewObjectID()
+	armor := mockSingleArmor(id, "test", 5)
+	armors := mockArmor(armor)
+	service := InitMockGearService(nil, armors, nil, nil, nil)
+
+	r, err := http.NewRequest("GET", "/armor", nil)
+	if err != nil {
+		t.Errorf("GetArmor() error creating request:\ngot: %v\n expected: <no error>", err)
+	}
+
+	w := httptest.NewRecorder()
+	router := mux.NewRouter().StrictSlash(true)
+	service.Routes(router).ServeHTTP(w, r)
+
+	if w.Code != http.StatusOK {
+		t.Errorf("GetArmor() error:\ngot: %v\nexpected: %v", w.Code, http.StatusOK)
+	}
+
+	resp := []model.Armor{}
+	err = json.NewDecoder(w.Body).Decode(&resp)
+	if err != nil {
+		t.Errorf("GetArmor() error:\n got: %v\n expected: <nil>", err)
+	}
+	if resp[0].ID != armor.ID || resp[0].ArmorType != armor.ArmorType || resp[0].Price != armor.Price {
+		t.Errorf("GetArmor() error:\ngot: %v\nexpected: %v", resp[0], armor)
+	}
+}
+
+func TestGearService_GetArmor_DBError(t *testing.T) {
+	service := InitMockGearService(nil, nil, nil, nil, errors.New("test error"))
+
+	r, err := http.NewRequest("GET", "/armor", nil)
+	if err != nil {
+		t.Errorf("GetArmor() error creating request:\ngot: %v\nexpected:<no error>", err)
+	}
+
+	w := httptest.NewRecorder()
+	router := mux.NewRouter().StrictSlash(true)
+	service.Routes(router).ServeHTTP(w, r)
+
+	if w.Code != http.StatusInternalServerError {
+		t.Errorf("GetForceCharacterSheets() error:\ngot: %v\nexpected: %v", w.Code, http.StatusInternalServerError)
+	}
+}
+
+//TODO: GetWeapon TESTS
+
+func TestGearService_GetArmorByID_Success(t *testing.T) {
+	id := primitive.NewObjectID()
+	armor := mockSingleArmor(id, "test", 5)
+	service := InitMockGearService(&armor, nil, nil, nil, nil)
+
+	r, err := http.NewRequest("GET", "/armor/"+id.Hex(), nil)
+	if err != nil {
+		t.Errorf("GetArmorByID() error:\ngot: %v\nexpected: <no error>", err)
+	}
+
+	w := httptest.NewRecorder()
+	router := mux.NewRouter().StrictSlash(true)
+	service.Routes(router).ServeHTTP(w, r)
+
+	if w.Code != http.StatusOK {
+		t.Errorf("GetArmorByID() error:\ngot: %v\nexpected: %v", w.Code, http.StatusOK)
+	}
+
+	resp := model.Armor{}
+	err = json.NewDecoder(w.Body).Decode(&resp)
+	if err != nil {
+		t.Errorf("GetArmorByID() error:\n got: %v\n expected: <nil>", err)
+	}
+	if resp.ID != armor.ID || resp.ArmorType != armor.ArmorType || resp.Price != armor.Price {
+		t.Errorf("GetArmorByID() error:\ngot: %v\nexpected: %v", resp, armor)
+	}
+}
+
+func TestGearService_GetArmorByID_DBError(t *testing.T) {
+	id := primitive.NewObjectID()
+	service := InitMockGearService(nil, nil, nil, nil, errors.New("test error"))
+
+	r, err := http.NewRequest("GET", "/armor/"+id.Hex(), nil)
+	if err != nil {
+		t.Errorf("GetArmorByID() error:\ngot: %v\nexpected: <no error>", err)
+	}
+
+	w := httptest.NewRecorder()
+	router := mux.NewRouter().StrictSlash(true)
+	service.Routes(router).ServeHTTP(w, r)
+
+	if w.Code != http.StatusInternalServerError {
+		t.Errorf("GetArmorByID() error:\ngot: %v\nexpected: %v", w.Code, http.StatusInternalServerError)
+	}
+}
+
+func TestGearService_GetArmorbyID_BadID(t *testing.T) {
+	id := "this is a bad id"
+	service := InitMockGearService(nil, nil, nil, nil, nil)
+
+	r, err := http.NewRequest("GET", "/armor/"+id, nil)
+	if err != nil {
+		t.Errorf("GetArmorByID() error:\ngot: %v\nexpected: <no error>", err)
+	}
+
+	w := httptest.NewRecorder()
+	router := mux.NewRouter().StrictSlash(true)
+	service.Routes(router).ServeHTTP(w, r)
+
+	if w.Code != http.StatusInternalServerError {
+		t.Errorf("FindForceCharacterSheetByID() error:\ngot: %v\nexpected: %v", w.Code, http.StatusInternalServerError)
+	}
+}
+
+//TODO: GetWeaponByID TESTS
