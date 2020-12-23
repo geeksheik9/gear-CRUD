@@ -164,3 +164,61 @@ func TestGearService_InsertArmor_BadJSON(t *testing.T) {
 		t.Errorf("InsertArmor() error:\ngot: %v\nexpected: %v", w.Code, http.StatusBadRequest)
 	}
 }
+
+func TestGearService_InsertWeapon_Success(t *testing.T) {
+	id := primitive.NewObjectID()
+	weapon := mockWeapon(id, "test", 5)
+	service := InitMockGearService(nil, nil, &weapon, nil, nil)
+
+	request, _ := json.Marshal(weapon)
+
+	r, err := http.NewRequest("POST", "/weapon", bytes.NewBuffer(request))
+	if err != nil {
+		t.Errorf("InsertWeapon() error creating request:\ngot: %v\nexpected: <no error>", err)
+	}
+
+	w := httptest.NewRecorder()
+	router := mux.NewRouter().StrictSlash(true)
+	service.Routes(router).ServeHTTP(w, r)
+	if w.Code != http.StatusOK {
+		t.Errorf("InsertWeapon() error:\ngot: %v\nexpected: %v", w.Code, http.StatusOK)
+	}
+}
+func TestGearService_InsertWeapon_DBError(t *testing.T) {
+	id := primitive.NewObjectID()
+	weapon := mockWeapon(id, "test", 5)
+	service := InitMockGearService(nil, nil, nil, nil, errors.New("test error"))
+
+	request, _ := json.Marshal(weapon)
+
+	r, err := http.NewRequest("POST", "/weapon", bytes.NewBuffer(request))
+	if err != nil {
+		t.Errorf("InsertWeapon() error creating request:\ngot: %v\nexpected: <no error>", err)
+	}
+
+	w := httptest.NewRecorder()
+	router := mux.NewRouter().StrictSlash(true)
+	service.Routes(router).ServeHTTP(w, r)
+
+	if w.Code != http.StatusInternalServerError {
+		t.Errorf("InsertWeapon() error:\ngot: %v\nexpected:%v", w.Code, http.StatusInternalServerError)
+	}
+}
+func TestGearService_InsertWeapon_BadJSON(t *testing.T) {
+	service := InitMockGearService(nil, nil, nil, nil, nil)
+
+	request, _ := json.Marshal(`{bad json`)
+
+	r, err := http.NewRequest("POST", "/weapon", bytes.NewBuffer(request))
+	if err != nil {
+		t.Errorf("InsertWeapon() error creating request:\ngot: %v\nexpected: <no error>", err)
+	}
+
+	w := httptest.NewRecorder()
+	router := mux.NewRouter().StrictSlash(true)
+	service.Routes(router).ServeHTTP(w, r)
+
+	if w.Code != http.StatusBadRequest {
+		t.Errorf("InsertWeapon() error:\ngot: %v\nexpected: %v", w.Code, http.StatusBadRequest)
+	}
+}
