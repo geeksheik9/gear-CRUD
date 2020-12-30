@@ -269,7 +269,6 @@ func TestGearService_GetArmor_DBError(t *testing.T) {
 	}
 }
 
-//TODO: GetWeapon TESTS
 func TestGearService_GetWeapon_Success(t *testing.T) {
 	id := primitive.NewObjectID()
 	weapon := mockWeapon(id, "test", 5)
@@ -380,7 +379,6 @@ func TestGearService_GetArmorbyID_BadID(t *testing.T) {
 	}
 }
 
-//TODO: GetWeaponByID TESTS
 func TestGearService_GetWeaponByID_Success(t *testing.T) {
 	id := primitive.NewObjectID()
 	weapon := mockWeapon(id, "test", 5)
@@ -430,7 +428,7 @@ func TestGearService_GetWeaponByID_BadID(t *testing.T) {
 	id := "this is a bad id"
 	service := InitMockGearService(nil, nil, nil, nil, nil)
 
-	r, err := http.NewRequest("GET", "/armor/"+id, nil)
+	r, err := http.NewRequest("GET", "/weapon/"+id, nil)
 	if err != nil {
 		t.Errorf("GetWeaponByID error: \n got: %v \n expected: <no error>", err)
 	}
@@ -443,3 +441,81 @@ func TestGearService_GetWeaponByID_BadID(t *testing.T) {
 		t.Errorf("GetForceCharacterSheetByID error: \n got: %v \n expected: %v", w.Code, http.StatusInternalServerError)
 	}
 }
+
+func TestGearService_UpdateArmorByID_Success(t *testing.T) {
+	id := primitive.NewObjectID()
+	armor := mockSingleArmor(id, "test", 5)
+	service := InitMockGearService(&armor, nil, nil, nil, nil)
+
+	request, _ := json.Marshal(armor)
+
+	r, err := http.NewRequest("PUT", "/armor/"+id.Hex(), bytes.NewBuffer(request))
+	if err != nil {
+		t.Errorf("UpdateArmorByID() error creating request:\ngot: %v\nexpected: <no error>", err)
+	}
+
+	w := httptest.NewRecorder()
+	router := mux.NewRouter().StrictSlash(true)
+	service.Routes(router).ServeHTTP(w, r)
+	if w.Code != http.StatusOK {
+		t.Errorf("UpdatedArmorByID error:\ngot: %v\nexpected: %v", w.Code, http.StatusOK)
+	}
+
+	idString := "\"" + id.Hex() + "\""
+	if w.Body.String() != idString {
+		t.Errorf("UpdateArmorByID error:\ngot: %v\nexpected: %v", w.Body.String(), idString)
+	}
+}
+
+//TODO: DB Error
+func TestGearService_UpdateArmorByID_DBError(t *testing.T) {
+
+}
+
+//TODO: BAD ID
+func TestGearService_UpdateArmorByID_BadID(t *testing.T) {
+
+}
+
+func TestGearService_UpdateArmorByID_BadJSON(t *testing.T) {
+	id := primitive.NewObjectID()
+	service := InitMockGearService(nil, nil, nil, nil, nil)
+
+	request, _ := json.Marshal(`{bad json`)
+
+	r, err := http.NewRequest("PUT", "/armor/"+id.Hex(), bytes.NewBuffer(request))
+	if err != nil {
+		t.Errorf("UpdateArmorByID() error creating request:\ngot: %v\nexpected: <no error>", err)
+	}
+
+	w := httptest.NewRecorder()
+	router := mux.NewRouter().StrictSlash(true)
+	service.Routes(router).ServeHTTP(w, r)
+
+	if w.Code != http.StatusBadRequest {
+		t.Errorf("UpdatedArmorByID() error:\ngot: %v\nexpected: %v", w.Code, http.StatusBadRequest)
+	}
+}
+
+//TODO: UpdateWeaponByID Tests (success, db error, bad id, bad json)
+func TestGearService_DeleteArmorByID_Success(t *testing.T) {
+	id := primitive.NewObjectID()
+	service := InitMockGearService(nil, nil, nil, nil, nil)
+
+	r, err := http.NewRequest("DELETE", "/armor/"+id.Hex(), nil)
+	if err != nil {
+		t.Errorf("DeleteArmorByID() error creating request:\ngot: %v\nexpected: <no error>", err)
+	}
+
+	w := httptest.NewRecorder()
+	router := mux.NewRouter().StrictSlash(true)
+	service.Routes(router).ServeHTTP(w, r)
+
+	if w.Code != http.StatusNoContent {
+		t.Errorf("DeleteArmorByID() error:\n got:%v\nexpected: %v", w.Code, http.StatusNoContent)
+	}
+}
+
+//TODO: DB error
+//TODO: Bad id
+//TODO: DeleteWeaponByID Tests (success, db error, bad id)
