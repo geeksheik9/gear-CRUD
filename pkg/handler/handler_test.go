@@ -270,6 +270,51 @@ func TestGearService_GetArmor_DBError(t *testing.T) {
 }
 
 //TODO: GetWeapon TESTS
+func TestGearService_GetWeapon_Success(t *testing.T) {
+	id := primitive.NewObjectID()
+	weapon := mockWeapon(id, "test", 5)
+	weapons := mockWeapons(weapon)
+	service := InitMockGearService(nil, nil, nil, weapons, nil)
+
+	r, err := http.NewRequest("GET", "/weapon", nil)
+	if err != nil {
+		t.Errorf("GetWeapon() error creating request: \n got: %v\n expected: <no error>", err)
+	}
+
+	w := httptest.NewRecorder()
+	router := mux.NewRouter().StrictSlash(true)
+	service.Routes(router).ServeHTTP(w, r)
+
+	if w.Code != http.StatusOK {
+		t.Errorf("GetWeapon() error:\ngot: %v\nexpected: %v", w.Code, http.StatusOK)
+	}
+
+	resp := []model.Weapon{}
+	err = json.NewDecoder(w.Body).Decode(&resp)
+	if err != nil {
+		t.Errorf("GetWeapon() error:\n got: %v\n expected: <nil>", err)
+	}
+	if resp[0].ID != weapon.ID || resp[0].WeaponType != weapon.WeaponType || resp[0].Price != weapon.Price {
+		t.Errorf("GetWeapon() error:\ngot: %v\nexpected: %v", resp[0], weapon)
+	}
+}
+
+func TestGearService_GetWeapon_DBError(t *testing.T) {
+	service := InitMockGearService(nil, nil, nil, nil, errors.New("test error"))
+
+	r, err := http.NewRequest("GET", "/weapon", nil)
+	if err != nil {
+		t.Errorf("GetWeapon() error creating request: \n got: %v \n expected: <no error>", err)
+	}
+
+	w := httptest.NewRecorder()
+	router := mux.NewRouter().StrictSlash(true)
+	service.Routes(router).ServeHTTP(w, r)
+
+	if w.Code != http.StatusInternalServerError {
+		t.Errorf("GetForceCharacterSheets() error: \n got: %v \n expected: %v", w.Code, http.StatusInternalServerError)
+	}
+}
 
 func TestGearService_GetArmorByID_Success(t *testing.T) {
 	id := primitive.NewObjectID()
@@ -336,3 +381,65 @@ func TestGearService_GetArmorbyID_BadID(t *testing.T) {
 }
 
 //TODO: GetWeaponByID TESTS
+func TestGearService_GetWeaponByID_Success(t *testing.T) {
+	id := primitive.NewObjectID()
+	weapon := mockWeapon(id, "test", 5)
+	service := InitMockGearService(nil, nil, &weapon, nil, nil)
+
+	r, err := http.NewRequest("GET", "/weapon/"+id.Hex(), nil)
+	if err != nil {
+		t.Errorf("GetWeaponByID() error:\n got: %v \n expected: <no error>", err)
+	}
+
+	w := httptest.NewRecorder()
+	router := mux.NewRouter().StrictSlash(true)
+	service.Routes(router).ServeHTTP(w, r)
+
+	if w.Code != http.StatusOK {
+		t.Errorf("GetArmorByID() error:\ngot: %v\nexpected: %v", w.Code, http.StatusOK)
+	}
+	resp := model.Weapon{}
+	err = json.NewDecoder(w.Body).Decode(&resp)
+	if err != nil {
+		t.Errorf("GetWeaponByID() error: \n got: %v \n expected: <nil>", err)
+	}
+	if resp.ID != weapon.ID || resp.WeaponType != weapon.WeaponType || resp.Price != weapon.Price {
+		t.Errorf("GetWeaponByID error: \n got: %v \n expected: %v", resp, weapon)
+	}
+}
+
+func TestGearService_GetWeaponByID_DBError(t *testing.T) {
+	id := primitive.NewObjectID()
+	service := InitMockGearService(nil, nil, nil, nil, errors.New("test error"))
+
+	r, err := http.NewRequest("GET", "/weapon/"+id.Hex(), nil)
+	if err != nil {
+		t.Errorf("GetWeaponByID error: \n got: %v \n expected: <no error>", err)
+	}
+
+	w := httptest.NewRecorder()
+	router := mux.NewRouter().StrictSlash(true)
+	service.Routes(router).ServeHTTP(w, r)
+
+	if w.Code != http.StatusInternalServerError {
+		t.Errorf("GetWeaponByID error: \n got: %v \n expected: %v", w.Code, http.StatusInternalServerError)
+	}
+}
+
+func TestGearService_GetWeaponByID_BadID(t *testing.T) {
+	id := "this is a bad id"
+	service := InitMockGearService(nil, nil, nil, nil, nil)
+
+	r, err := http.NewRequest("GET", "/armor/"+id, nil)
+	if err != nil {
+		t.Errorf("GetWeaponByID error: \n got: %v \n expected: <no error>", err)
+	}
+
+	w := httptest.NewRecorder()
+	router := mux.NewRouter().StrictSlash(true)
+	service.Routes(router).ServeHTTP(w, r)
+
+	if w.Code != http.StatusInternalServerError {
+		t.Errorf("GetForceCharacterSheetByID error: \n got: %v \n expected: %v", w.Code, http.StatusInternalServerError)
+	}
+}
